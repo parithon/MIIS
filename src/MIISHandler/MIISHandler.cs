@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Security;
 using System.Web;
 using IISHelpers;
+using Microsoft.SharePoint;
 
 namespace MIISHandler
 {
@@ -31,6 +33,18 @@ namespace MIISHandler
                 //Try to process the markdown file
                 string filePath = ctx.Server.MapPath(ctx.Request.FilePath);
                 MarkdownFile mdFile = new MarkdownFile(filePath);
+
+                if (!File.Exists(filePath) && ctx.Request.Params.AllKeys.ToList().Contains("HTTP_SPIISTIMESTAMP"))
+                {
+                    var identity = ctx.Request.Url.AbsoluteUri.Substring(0, ctx.Request.Url.AbsoluteUri.Length - ctx.Request.Url.PathAndQuery.Length);
+                    var siteUrl = $"{ctx.Request.Url.Scheme}://{ctx.Request.Url.Authority}:{ctx.Request.Url.Port}";
+                    using (var spSite = new SPSite(identity))
+                    {
+                        var spWeb = spSite.OpenWeb();
+                        var content = spWeb.GetFileAsString(ctx.Request.FilePath);
+                        mdFile.SPContent(content);
+                    }
+                }
 
                 //If the feature is enabled and the user requests the original file, send the original file
                 if (!string.IsNullOrEmpty(ctx.Request.QueryString["download"]))

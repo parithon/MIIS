@@ -29,6 +29,7 @@ namespace MIISHandler
         private DateTime _dateCreated;
         private DateTime _dateLastModified;
         SimpleYAMLParser _FrontMatter;
+        private bool _isSharePointFile;
         #endregion
 
         #region Constructor
@@ -40,6 +41,13 @@ namespace MIISHandler
             this.FilePath = mdFilePath;
         }
         #endregion
+
+        public void SPContent(string content)
+        {
+            _isSharePointFile = true;
+            _content = content;
+            ProcessFrontMatter();
+        }
 
         #region Properties
         //Complex properties
@@ -116,7 +124,14 @@ namespace MIISHandler
                                 this.FilePath   //Add current file as cache dependency (the render process will add the fragments if needed)
                             };
                             _html = HTMLRenderer.RenderMarkdown(this);
-                            HttpRuntime.Cache.Insert(this.FilePath + "_HTML", _html, new CacheDependency(this.Dependencies.ToArray())); //Add result to cache with dependency on the file
+                            if (_isSharePointFile)
+                            {
+                                HttpRuntime.Cache.Insert(this.FilePath + "_HTML", _html); // Add result to cache without depenency on the file
+                            }
+                            else
+                            {
+                                HttpRuntime.Cache.Insert(this.FilePath + "_HTML", _html, new CacheDependency(this.Dependencies.ToArray())); //Add result to cache with dependency on the file
+                            }
                         }
                     }
                     else
