@@ -37,12 +37,12 @@ namespace MIISHandler
                 if (!File.Exists(filePath) && ctx.Request.Params.AllKeys.ToList().Contains("HTTP_SPIISTIMESTAMP"))
                 {
                     var identity = ctx.Request.Url.AbsoluteUri.Substring(0, ctx.Request.Url.AbsoluteUri.Length - ctx.Request.Url.PathAndQuery.Length);
-                    var siteUrl = $"{ctx.Request.Url.Scheme}://{ctx.Request.Url.Authority}:{ctx.Request.Url.Port}";
+                    var siteUrl = $"{ctx.Request.Url.Scheme}://{ctx.Request.Url.Authority}{ctx.Request.ApplicationPath.TrimEnd('/')}/";
                     using (var spSite = new SPSite(identity))
                     {
                         var spWeb = spSite.OpenWeb();
                         var content = spWeb.GetFileAsString(ctx.Request.FilePath);
-                        mdFile.SPContent(content);
+                        mdFile.SPContent(content, siteUrl, ctx.Request.UrlReferrer?.AbsoluteUri ?? "", spWeb.Title);
                     }
                 }
 

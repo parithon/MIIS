@@ -29,7 +29,9 @@ namespace MIISHandler
         private DateTime _dateCreated;
         private DateTime _dateLastModified;
         SimpleYAMLParser _FrontMatter;
-        private bool _isSharePointFile;
+        private string _siteUrl;
+        private string _siteTitle;
+        private string _referrerUrl;
         #endregion
 
         #region Constructor
@@ -42,9 +44,12 @@ namespace MIISHandler
         }
         #endregion
 
-        public void SPContent(string content)
+        public void SPContent(string content, string siteUrl, string referrerUrl, string siteTitle)
         {
-            _isSharePointFile = true;
+            IsSharePointFile = true;
+            _siteUrl = siteUrl;
+            _siteTitle = siteTitle;
+            _referrerUrl = referrerUrl;
             _content = content;
             ProcessFrontMatter();
         }
@@ -52,6 +57,9 @@ namespace MIISHandler
         #region Properties
         //Complex properties
         public string FilePath { get; private set; } //The full path to the file
+        public bool IsSharePointFile { get; protected set; }
+        public string SPSiteUrl { get { return _siteUrl; } }
+        public string SPSiteTitle { get { return _siteTitle; } }
         
         //The raw file contents, read from disk
         public string Content
@@ -124,7 +132,7 @@ namespace MIISHandler
                                 this.FilePath   //Add current file as cache dependency (the render process will add the fragments if needed)
                             };
                             _html = HTMLRenderer.RenderMarkdown(this);
-                            if (_isSharePointFile)
+                            if (IsSharePointFile)
                             {
                                 HttpRuntime.Cache.Insert(this.FilePath + "_HTML", _html); // Add result to cache without depenency on the file
                             }

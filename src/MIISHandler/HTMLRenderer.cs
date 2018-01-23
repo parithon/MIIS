@@ -61,6 +61,12 @@ namespace MIISHandler
             template = TemplatingHelper.ReplacePlaceHolder(template, "isauthenticated", ctx.User.Identity.IsAuthenticated.ToString());
             template = TemplatingHelper.ReplacePlaceHolder(template, "authtype", ctx.User.Identity.AuthenticationType);
             template = TemplatingHelper.ReplacePlaceHolder(template, "username", ctx.User.Identity.Name);
+            
+            if (md.IsSharePointFile)
+            {
+                template = TemplatingHelper.ReplacePlaceHolder(template, "SPHostTitle", md.SPSiteTitle);
+                template = TemplatingHelper.ReplacePlaceHolder(template, "SPHostUrl", md.SPSiteUrl);
+            }
 
             //Process fragments (other files inserted into the current one or template)
             template = ProcessFragments(template, md, ctx);
